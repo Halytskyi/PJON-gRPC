@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package pjongrpc;
+
+// The Arduino service definition.
+service Arduino {
+  rpc RPiArduino (Arduino_Request) returns (Arduino_Reply) {}
+}
+
+// The request message containing the node_id and data.
+message Arduino_Request {
+  int32 node_id = 1;
+  string data = 2;
+}
+
+// The response message containing the answer
+message Arduino_Reply {
+  string message = 1;
+}
