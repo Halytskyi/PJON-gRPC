@@ -139,7 +139,7 @@ class ArduinoServiceImpl final : public Arduino::Service {
   }
 };
 
-void RunServer() {
+void run_server() {
   std::string server_address("0.0.0.0:50051");
   ArduinoServiceImpl service;
   ServerBuilder builder;
@@ -192,9 +192,14 @@ int main(int argc, char** argv) {
   try {
     printf("Opening serial... \n");
     int s = serialOpen(com_str, bitRate);
-    // TODO: Doesn't work check now - need fix
-    if(s < 0) printf("Serial open fail!");
-    if(wiringPiSetup() == -1) printf("WiringPi setup fail");
+    if (int(s) < 0) {
+      printf("Serial open fail!\n");
+      exit (EXIT_FAILURE);
+    }
+    if (wiringPiSetup() == -1) {
+      printf("WiringPi setup fail");
+      exit (EXIT_FAILURE);
+    }
 
     printf("Setting serial... \n");
     bus.strategy.set_serial(s);
@@ -206,7 +211,7 @@ int main(int argc, char** argv) {
     bus.set_error(error_handler_function);
     bus.set_synchronous_acknowledge(true);
 
-    RunServer();
+    run_server();
     return 0;
   }
   catch (const char* msg) {
