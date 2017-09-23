@@ -1,4 +1,4 @@
 # PJON-gRPC
 gRPC server-client for PJON bus
 
-PJON™ is a self-funded, no-profit open-source project created and mantained by Giovanni Blu Mitolo gioscarab@gmail.com https://github.com/gioblu/PJON
+PJON™ (Padded Jittering Operative Network) is an Arduino compatible, multi-master, multi-media communications bus system created and mantained by Giovanni Blu Mitolo gioscarab@gmail.com https://github.com/gioblu/PJON
