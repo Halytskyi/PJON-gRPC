@@ -28,4 +28,4 @@ Write Virtual PIN:
 Client received: 1
 ```
 
-Makefile - for compiling code and flashing it to Arduino directly from RPi (see https://github.com/sudar/Arduino-Makefile)
+`Makefile` - for compiling code and flashing it to Arduino directly from RPi (see https://github.com/sudar/Arduino-Makefile)
