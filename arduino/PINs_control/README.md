@@ -1,6 +1,7 @@
 This sketch is example how can control PINs via PJON-gRPC tool
 
 **Examples** (with use python client on RPi side):
+
 Read Hardware Digital PIN (_digitalRead(13)_):
 ```
 $ ./pjon_grpc_client.py 44 H:13
@@ -26,3 +27,5 @@ Write Virtual PIN:
 ./pjon_grpc_client.py 44 V:0:1
 Client received: 1
 ```
+
+Makefile - for compiling code and flashing it to Arduino directly from RPi (see https://github.com/sudar/Arduino-Makefile)
