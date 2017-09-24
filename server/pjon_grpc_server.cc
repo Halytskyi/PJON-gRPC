@@ -210,6 +210,8 @@ int main(int argc, char** argv) {
     bus.set_receiver(receiver_function);
     bus.set_error(error_handler_function);
     bus.set_synchronous_acknowledge(true);
+    // crc_8 doesn't work correctly with 8.x PJON version, can be fixed in v9.x
+    bus.set_crc_32(true);
 
     run_server();
     return 0;
