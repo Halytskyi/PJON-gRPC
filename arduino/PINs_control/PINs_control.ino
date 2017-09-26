@@ -106,6 +106,11 @@ void receiver_function(uint8_t *payload, uint16_t length, const PJON_Packet_Info
   }
 };
 
+void loop() {
+  bus.receive(1000);
+  bus.update();
+};
+
 void setup() {
   Serial.begin(115200);
 
@@ -113,15 +118,10 @@ void setup() {
   pinMode(13, OUTPUT);
   digitalWrite(13, LOW);
 
-  bus.set_receiver(receiver_function);
   bus.strategy.set_serial(&Serial);
-  bus.begin();
+  bus.set_receiver(receiver_function);
   bus.set_synchronous_acknowledge(true);
   // crc_8 doesn't work correctly with 8.x PJON version, can be fixed in v9.x
   bus.set_crc_32(true);
-};
-
-void loop() {
-  bus.receive(1000);
-  bus.update();
+  bus.begin();
 };
