@@ -2,7 +2,7 @@
 #include "version.h"
 #include <stdio.h>
 // PJON library
-#define TS_RESPONSE_TIME_OUT 35000
+#define TS_RESPONSE_TIME_OUT 75000
 #define PJON_INCLUDE_TS true // Include only ThroughSerial
 #ifndef RPI
   #define RPI true
@@ -119,12 +119,16 @@ void print_usage_help() {
 }
 
 void pjon_communication(int node_id, const char* data) {
+  printf(data);
+  printf("\n");
   printf("Attempting to send a packet... \n");
   bus.send(node_id, data, strlen(data));
   printf("Attempting to roll bus... \n");
   bus.update();
   printf("Attempting to receive from bus... \n");
   bus.receive(5000000);
+//uint32_t time = micros();
+//while(micros() - time < 5000000) { bus.update(); bus.receive(); }
 }
 
 class ArduinoServiceImpl final : public Arduino::Service {
@@ -222,4 +226,5 @@ int main(int argc, char** argv) {
               << std::endl;
     return 1;
   }
+
 }
