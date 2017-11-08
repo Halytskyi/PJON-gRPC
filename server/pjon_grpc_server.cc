@@ -33,6 +33,7 @@ PJON<ThroughSerial> bus(1);
 
 uint64_t rcvd_cnt = 0;
 std::string response;
+int send_tries = 5;
 
 
 static void receiver_function(
@@ -126,9 +127,12 @@ void pjon_communication(int node_id, const char* data) {
   printf("Attempting to roll bus... \n");
   bus.update();
   printf("Attempting to receive from bus... \n");
-  bus.receive(5000000);
-//uint32_t time = micros();
-//while(micros() - time < 5000000) { bus.update(); bus.receive(); }
+  bus.receive(1000000);
+/*  uint32_t time = micros();
+  while(micros() - time < 1000000) {
+    bus.update();
+    bus.receive();
+  } */
 }
 
 class ArduinoServiceImpl final : public Arduino::Service {
@@ -138,6 +142,19 @@ class ArduinoServiceImpl final : public Arduino::Service {
     int node_id = request->node_id();
     const char* data = request->data().c_str();
     pjon_communication(node_id, data);
+    // Retry send request if didn't get data
+    if (response == "") {
+      int send_try = 1;
+      while(send_try != send_tries +1) {
+        pjon_communication(node_id, data);
+        printf("Repeat: %d\n", send_try);
+        if (response == "") {
+          send_try += 1;
+        } else {
+          send_try = send_tries + 1;
+        }
+      }
+    }
     reply->set_message(response);
     return Status::OK;
   }
@@ -213,7 +230,8 @@ int main(int argc, char** argv) {
     bus.begin();
     bus.set_receiver(receiver_function);
     bus.set_error(error_handler_function);
-    bus.set_synchronous_acknowledge(true);
+    // with enabled ask we have repeated requests send time to time
+    bus.set_synchronous_acknowledge(false);
     // crc_8 doesn't work correctly with 8.x PJON version, can be fixed in v9.x
     bus.set_crc_32(true);
 

@@ -39,22 +39,19 @@ void receiver_functionB(uint8_t *payload, uint16_t length, const PJON_Packet_Inf
 }
 
 void loop() {
-  busA.receive(3000);
+  busA.receive(30000);
   busB.update();
-  busB.receive(3000);
+  busB.receive(30000);
   busA.update();
 };
 
 void setup() {
   Serial.begin(115200);
-  // Initialize LED 13 to be off (for tests)
-  pinMode(13, OUTPUT);
-  digitalWrite(13, LOW);
 
   // PRi
   busA.strategy.set_serial(&Serial);
   busA.set_receiver(receiver_functionA);
-  busA.set_synchronous_acknowledge(true);
+  busA.set_synchronous_acknowledge(false);
   busA.set_crc_32(true);
   busA.set_router(true);
   busA.begin();
@@ -62,7 +59,7 @@ void setup() {
   // Devices
   busB.strategy.set_pin(7);
   busB.set_receiver(receiver_functionB);
-  busB.set_synchronous_acknowledge(true);
+  busB.set_synchronous_acknowledge(false);
   busB.set_crc_32(true);
   busB.set_router(true);
   busB.begin();
