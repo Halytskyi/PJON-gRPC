@@ -1,8 +1,11 @@
 // Common libraries
 #include "version.h"
 #include <stdio.h>
+#include <thread>
+#include <queue>
+#include <vector>
 // PJON library
-#define TS_RESPONSE_TIME_OUT 75000
+#define TS_RESPONSE_TIME_OUT 35000
 #define PJON_INCLUDE_TS true // Include only ThroughSerial
 #ifndef RPI
   #define RPI true
@@ -23,6 +26,8 @@
 using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
+using grpc::Channel;
+using grpc::ClientContext;
 using grpc::Status;
 using pjongrpc::Arduino_Request;
 using pjongrpc::Arduino_Reply;
@@ -31,9 +36,13 @@ using pjongrpc::Arduino;
 // TODO: Find the way to change in from command line
 PJON<ThroughSerial> bus(1);
 
+int debug = 0;
 uint64_t rcvd_cnt = 0;
+int client_query = 0;
+std::string client_response = "";
 std::string response;
-int send_tries = 5;
+std::vector<std::string> receives_array = {"", ""};
+std::queue<std::vector<std::string>> receives_queue;
 
 
 static void receiver_function(
@@ -41,31 +50,43 @@ static void receiver_function(
         uint16_t length,
         const PJON_Packet_Info &packet_info){
 
+  response = "";
   for (uint32_t i = 0; i != length; i++){
     response += payload[i];
   }
 
-  rcvd_cnt += 1;
-  std::cout << "#RCV snd_id=" << std::to_string(packet_info.sender_id)
-            << " snd_net=";
-                          for (uint32_t i = 0; i < sizeof(packet_info.sender_bus_id); i++) {
-                            std::cout << std::to_string(packet_info.sender_bus_id[i]);
-                            if (i < sizeof(packet_info.sender_bus_id) - 1)
-                              std::cout << ".";
-                          }
-  std::cout << " rcv_id=" << std::to_string(packet_info.receiver_id)
-            << " rcv_net=";
-                          for (uint32_t i = 0; i < sizeof(packet_info.receiver_bus_id); i++) {
-                            std::cout << std::to_string(packet_info.receiver_bus_id[i]);
-                            if (i < sizeof(packet_info.receiver_bus_id) - 1)
-                              std::cout << ".";
-                          }
-  std::cout << " id=" << std::to_string(packet_info.id)
-            << " hdr=" << std::to_string(packet_info.header)
-            << " pckt_cnt=" << std::to_string(rcvd_cnt)
-            << " len=" << length
-            << " data=" << response;
-  std::cout << std::endl;
+  if (debug == 1) {
+    rcvd_cnt += 1;
+    std::cout << "#RCV snd_id=" << std::to_string(packet_info.sender_id)
+              << " snd_net=";
+                            for (uint32_t i = 0; i < sizeof(packet_info.sender_bus_id); i++) {
+                              std::cout << std::to_string(packet_info.sender_bus_id[i]);
+                              if (i < sizeof(packet_info.sender_bus_id) - 1)
+                                std::cout << ".";
+                            }
+    std::cout << " rcv_id=" << std::to_string(packet_info.receiver_id)
+              << " rcv_net=";
+                            for (uint32_t i = 0; i < sizeof(packet_info.receiver_bus_id); i++) {
+                              std::cout << std::to_string(packet_info.receiver_bus_id[i]);
+                              if (i < sizeof(packet_info.receiver_bus_id) - 1)
+                                std::cout << ".";
+                            }
+    std::cout << " id=" << std::to_string(packet_info.id)
+              << " hdr=" << std::to_string(packet_info.header)
+              << " pckt_cnt=" << std::to_string(rcvd_cnt)
+              << " len=" << length
+              << " data=" << response;
+    std::cout << std::endl;
+  }
+
+  // TODO: need implement additional check that we waiting exactly for this response, should be possible in PJON v10
+  if (client_query == packet_info.sender_id) {
+    client_response = response;
+  } else {
+    receives_array[0] = std::to_string(packet_info.sender_id);
+    receives_array[1] = response;
+    receives_queue.push(receives_array);
+  }
 };
 
 static void error_handler_function(uint8_t code, uint8_t data) {
@@ -100,17 +121,24 @@ bool is_third_arg_bus_id(int argc, char **argv) {
   return false;
 }
 
+bool is_fourth_arg_debug(int argc, char **argv) {
+  if (argv[4])
+    if (std::string(argv[4]) == "debug")
+      return true;
+  return false;
+}
+
 void print_usage_help() {
   std::cout
       << "PJON_gRPC - gRPC server-client for PJON bus\n"
       << "VERSION: " << PJON_gRPC_SERVER_VERSION << "\n"
       << "\n"
-      << "usage: pjon_grpc_server <COM PORT> <BITRATE> <NODE ID>\n"
-      << "                           \\          \\         \\\n"
-      << "                            \\          \\       0-255\n"
+      << "usage: pjon_grpc_server <COM PORT> <BITRATE> <NODE ID> <debug>\n"
+      << "                           \\          \\         \\         \\\n"
+      << "                            \\          \\       0-255   optional parameter\n"
       << "                     /dev/ttyXXXX     1200 - 153600\n"
       << std::endl
-      << "example: pjon_grpc_server /dev/ttyUSB0 57600 1" << std::endl
+      << "example: pjon_grpc_server /dev/ttyUSB0 115200 1" << std::endl
       << std::endl
       << "other options:" << std::endl
       << "   help - print this help" << std::endl
@@ -120,42 +148,33 @@ void print_usage_help() {
 }
 
 void pjon_communication(int node_id, const char* data) {
-  printf(data);
-  printf("\n");
-  printf("Attempting to send a packet... \n");
+  if (debug == 1) {
+    printf("Received command: %s\n", data);
+    printf("Attempting to send a packet... \n");
+  }
   bus.send(node_id, data, strlen(data));
-  printf("Attempting to roll bus... \n");
+  if (debug == 1)
+    printf("Attempting to roll bus... \n");
   bus.update();
-  printf("Attempting to receive from bus... \n");
-  bus.receive(1000000);
-/*  uint32_t time = micros();
-  while(micros() - time < 1000000) {
-    bus.update();
-    bus.receive();
-  } */
 }
 
 class ArduinoServiceImpl final : public Arduino::Service {
   Status RPiArduino(ServerContext* context, const Arduino_Request* request,
                   Arduino_Reply* reply) override {
-    response = "";
+    
     int node_id = request->node_id();
     const char* data = request->data().c_str();
+    client_query = node_id;
     pjon_communication(node_id, data);
-    // Retry send request if didn't get data
-    if (response == "") {
-      int send_try = 1;
-      while(send_try != send_tries +1) {
-        pjon_communication(node_id, data);
-        printf("Repeat: %d\n", send_try);
-        if (response == "") {
-          send_try += 1;
-        } else {
-          send_try = send_tries + 1;
-        }
+    uint32_t time = micros();
+    while(micros() - time < 3000000) {
+      if (client_response != "") {
+        time = micros() - 3000000;
       }
     }
-    reply->set_message(response);
+    reply->set_message(client_response);
+    client_query = 0;
+    client_response = "";
     return Status::OK;
   }
 };
@@ -167,8 +186,60 @@ void run_server() {
   builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
   builder.RegisterService(&service);
   std::unique_ptr<Server> server(builder.BuildAndStart());
-  std::cout << "Server listening on " << server_address << std::endl;
+  if (debug == 1)
+    std::cout << "Server listening on " << server_address << std::endl;
   server->Wait();
+}
+
+class ArduinoClient {
+ public:
+  ArduinoClient(std::shared_ptr<Channel> channel)
+      : stub_(Arduino::NewStub(channel)) {}
+  std::string RPiArduino(int node_id, const std::string& data) {
+    Arduino_Request request;
+    request.set_node_id(node_id);
+    request.set_data(data);
+    Arduino_Reply reply;
+    ClientContext context;
+    Status status = stub_->RPiArduino(&context, request, &reply);
+    if (status.ok()) {
+      return reply.message();
+    } else {
+      if (debug == 1) {
+        std::cout << status.error_code() << ": " << status.error_message()
+                  << std::endl;
+      }
+      return "RPC failed";
+    }
+  }
+ private:
+  std::unique_ptr<Arduino::Stub> stub_;
+};
+
+void grpc_client() {
+  ArduinoClient arduino(grpc::CreateChannel("localhost:50052", grpc::InsecureChannelCredentials()));
+  while(true) {
+    if (receives_queue.size() != 0) {
+      while(!receives_queue.empty()) {
+        int node_id = stoi(receives_queue.front()[0]);
+        std::string data = receives_queue.front()[1];
+        std::string reply = arduino.RPiArduino(node_id, data);
+        if (debug == 1)
+          std::cout << "Arduino answered: " << reply << std::endl;
+        if (reply == "done")
+          receives_queue.pop();
+        delayMicroseconds(1000000);
+      }
+    }
+    delayMicroseconds(1000000);
+  }
+}
+
+void listen_on_bus() {
+  while(true) {
+    bus.receive(1000);
+    delayMicroseconds(500000);
+  }
 }
 
 int main(int argc, char** argv) {
@@ -204,6 +275,9 @@ int main(int argc, char** argv) {
     std::cerr << "ERROR: third arg <NODE ID> should specify bus address 0 - 255\n";
     return 1;
   }
+  if (is_fourth_arg_debug(argc, argv)) {
+    debug = 1;
+  }
 
   char* com_str = argv[1];
   int bitRate = std::stoi(std::string(argv[2]));
@@ -211,7 +285,8 @@ int main(int argc, char** argv) {
 //  PJON<ThroughSerial> bus(std::stoi(std::string(argv[3])));
 
   try {
-    printf("Opening serial... \n");
+    if (debug == 1)
+      printf("Opening serial... \n");
     int s = serialOpen(com_str, bitRate);
     if (int(s) < 0) {
       printf("Serial open fail!\n");
@@ -222,18 +297,24 @@ int main(int argc, char** argv) {
       exit (EXIT_FAILURE);
     }
 
-    printf("Setting serial... \n");
+    if (debug == 1)
+      printf("Setting serial... \n");
     bus.strategy.set_serial(s);
     bus.strategy.set_baud_rate(bitRate);
 
-    printf("Opening bus... \n");
+    if (debug == 1)
+      printf("Opening bus... \n");
     bus.begin();
     bus.set_receiver(receiver_function);
-    bus.set_error(error_handler_function);
+    if (debug == 1)
+      bus.set_error(error_handler_function);
     // with enabled ask we have repeated requests send time to time
     bus.set_synchronous_acknowledge(false);
     // crc_8 doesn't work correctly with 8.x PJON version, can be fixed in v9.x
     bus.set_crc_32(true);
+
+    std::thread listen_on_bus_thd(listen_on_bus);
+    std::thread grpc_client_thd(grpc_client);
 
     run_server();
     return 0;
