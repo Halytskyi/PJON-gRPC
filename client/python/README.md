@@ -1,5 +1,5 @@
 ### Files:
-**pjon_grpc_client.py** - client for sending requests to Devices and getting responses
+**pjon_grpc_client.py** - client for sending requests to devices and getting responses
 ```
 $ ./pjon_grpc_client.py 11 T:2:1
 Client received: 1
