@@ -3,6 +3,10 @@
 
 PJON<SoftwareBitBang> bus(11);
 int packet;
+int test1 = 0;
+int test2_enabled = 0;
+int test2 = 0;
+unsigned long prevMillis = millis();
 
 
 void receiver_function(uint8_t *payload, uint16_t length, const PJON_Packet_Info &packet_info) {
@@ -49,6 +53,44 @@ void receiver_function(uint8_t *payload, uint16_t length, const PJON_Packet_Info
       if (!bus.packets[packet].state)
         packet = bus.reply("non-existent command", 20);
     }
+  } else if ((char)payload[0] == 'T') {
+    if ((char)payload[1] == ':') {
+      String test_num = String((char)payload[2]);
+      if (test_num == "1") {
+        test1 += 1;
+        char test1_char[16];
+        itoa (test1, test1_char, 10);
+        bus.reply(test1_char, String(test1).length());
+      } else if (test_num == "2") {
+        if ((char)payload[3] == ':') {
+          String command = String((char)payload[4]);
+          if (command == "0") {
+            test2_enabled = 0;
+            if (!bus.packets[packet].state)
+              bus.reply("0", 1);
+          } else if (command == "1") {
+            test2_enabled = 1;
+            if (!bus.packets[packet].state)
+              bus.reply("1", 1);
+          } else {
+            if (!bus.packets[packet].state)
+              bus.reply("non-existent command", 20);
+          }
+        } else {
+          if (!bus.packets[packet].state) {
+            char test2_enabled_char[16];
+            itoa (test2_enabled, test2_enabled_char, 10);
+            bus.reply(test2_enabled_char, 1);
+          }
+        }
+      } else {
+        if (!bus.packets[packet].state)
+          packet = bus.reply("non-existent command", 20);
+        }
+    } else {
+      if (!bus.packets[packet].state)
+        packet = bus.reply("non-existent command", 20);
+    }
   } else {
     if (!bus.packets[packet].state)
       packet = bus.reply("non-existent command", 20);
@@ -56,8 +98,19 @@ void receiver_function(uint8_t *payload, uint16_t length, const PJON_Packet_Info
 };
 
 void loop() {
-  bus.receive(30000);
+  bus.receive(3000);
   bus.update();
+
+  if (test2_enabled == 1) {
+    unsigned long curMillis = millis(); // time now in ms
+    if (curMillis - prevMillis >= 5000) {
+      test2 += 1;
+      char test2_char[16];
+      itoa (test2, test2_char, 10);
+      bus.send(1, test2_char, String(test2).length());
+      prevMillis = curMillis;
+    }
+  }
 };
 
 void setup() {

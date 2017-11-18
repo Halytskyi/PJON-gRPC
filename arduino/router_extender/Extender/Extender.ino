@@ -1,4 +1,4 @@
-#define TS_RESPONSE_TIME_OUT 75000
+#define TS_RESPONSE_TIME_OUT 35000
 #define PJON_INCLUDE_TS true // Include ThroughSerial
 #define PJON_INCLUDE_SWBB true // Include SoftwareBitBang
 #include <PJON.h>
@@ -39,9 +39,9 @@ void receiver_functionB(uint8_t *payload, uint16_t length, const PJON_Packet_Inf
 }
 
 void loop() {
-  busA.receive(30000);
+  busA.receive(3000);
   busB.update();
-  busB.receive(30000);
+  busB.receive(35000);
   busA.update();
 };
 

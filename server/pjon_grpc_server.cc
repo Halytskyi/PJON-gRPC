@@ -310,7 +310,6 @@ int main(int argc, char** argv) {
       bus.set_error(error_handler_function);
     // with enabled ask we have repeated requests send time to time
     bus.set_synchronous_acknowledge(false);
-    // crc_8 doesn't work correctly with 8.x PJON version, can be fixed in v9.x
     bus.set_crc_32(true);
 
     std::thread listen_on_bus_thd(listen_on_bus);
