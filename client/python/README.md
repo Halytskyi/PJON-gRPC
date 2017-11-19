@@ -4,7 +4,7 @@
 $ ./pjon_grpc_client.py 11 T:2:1
 Client received: 1
 ```
-**pjon_grpc_clientserver.py** - client-server script for receiving responses from devices (works in daemon mode)
+**pjon_grpc_clientserver.py** - client-server script for receiving messages from devices (works in daemon mode)
 ```
 $ ./pjon_grpc_clientserver.py
 Client-Server received: node_id=11, data=29

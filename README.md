@@ -8,3 +8,6 @@ gRPC is a modern open source high performance RPC framework that can run in any 
 ### Features
 - Receiving requests from client application (via gRPC, for example [pjon_grpc_client.py](client/python/pjon_grpc_client.py)) and making back response from devices which communicate with RPi via PJON
 - Receiving messages from devices which sending them to RPi via PJON and forward these messages to client (via gRPC, for example [pjon_grpc_clientserver.py](client/python/pjon_grpc_clientserver.py))
+
+#### Video example
+https://www.youtube.com/watch?v=J8FVPZW4y4I
