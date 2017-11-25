@@ -39,7 +39,7 @@ void receiver_functionB(uint8_t *payload, uint16_t length, const PJON_Packet_Inf
 }
 
 void loop() {
-  busA.receive(3000);
+  busA.receive(7000);
   busB.update();
   busB.receive(35000);
   busA.update();

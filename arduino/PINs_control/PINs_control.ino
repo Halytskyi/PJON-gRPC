@@ -2,11 +2,11 @@
  *  This sketch is example how can control PINs via PJON-gRPC tool
  *
  *  Examples (with use python client on RPi side):
- *  Read Hardware Digital PIN (digitalRead(13)): ./pjon_grpc_client.py 44 H:13
- *  Read Hardware Analog PIN (analogRead(14)): ./pjon_grpc_client.py 44 H:14
- *  Write Hardware Digital PIN (digitalWrite(13, 1)): ./pjon_grpc_client.py 44 H:13:1
- *  Read Virtual PIN: ./pjon_grpc_client.py 44 V:0
- *  Write Virtual PIN: ./pjon_grpc_client.py 44 V:0:1
+ *  Read Hardware Digital PIN (digitalRead(13)): ./pjon_grpc_client.py 44 H-13
+ *  Read Hardware Analog PIN (analogRead(14)): ./pjon_grpc_client.py 44 H-14
+ *  Write Hardware Digital PIN (digitalWrite(13, 1)): ./pjon_grpc_client.py 44 H-13-1
+ *  Read Virtual PIN: ./pjon_grpc_client.py 44 V-0
+ *  Write Virtual PIN: ./pjon_grpc_client.py 44 V-0-1
  *
  */
 
@@ -23,15 +23,15 @@ uint8_t vPIN[2] = { 0, 0 };
 void receiver_function(uint8_t *payload, uint16_t length, const PJON_Packet_Info &packet_info) {
   // Hardware PINs
   if ((char)payload[0] == 'H') {
-    if ((char)payload[1] == ':') {
+    if ((char)payload[1] == '-') {
       String pin_num = String((char)payload[2]);
-      if ((char)payload[3] != ':')
+      if ((char)payload[3] != '-')
         pin_num += String((char)payload[3]);
       int pin_num_int = pin_num.toInt();
       if (pin_num_int > 1 && pin_num_int < 14) {
-        if ((char)payload[3] == ':' || (char)payload[4] == ':') {
+        if ((char)payload[3] == '-' || (char)payload[4] == '-') {
           int pin_status;
-          if ((char)payload[3] == ':') {
+          if ((char)payload[3] == '-') {
             pin_status = (char)payload[4] - '0';
           } else {
             pin_status = (char)payload[5] - '0';
@@ -66,15 +66,15 @@ void receiver_function(uint8_t *payload, uint16_t length, const PJON_Packet_Info
     }
   // Virtual PINs
   } else if ((char)payload[0] == 'V') {
-    if ((char)payload[1] == ':') {
+    if ((char)payload[1] == '-') {
       String pin_num = String((char)payload[2]);
-      if ((char)payload[3] != ':')
+      if ((char)payload[3] != '-')
         pin_num += String((char)payload[3]);
       int pin_num_int = pin_num.toInt();
       if (pin_num_int >= 0 && pin_num_int < 2) {
-        if ((char)payload[3] == ':' || (char)payload[4] == ':') {
+        if ((char)payload[3] == '-' || (char)payload[4] == '-') {
           int pin_status;
-          if ((char)payload[3] == ':') {
+          if ((char)payload[3] == '-') {
             pin_status = (char)payload[4] - '0';
           } else {
             pin_status = (char)payload[5] - '0';

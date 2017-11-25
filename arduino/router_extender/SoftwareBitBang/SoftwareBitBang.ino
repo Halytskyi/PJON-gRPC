@@ -12,15 +12,15 @@ unsigned long prevMillis = millis();
 void receiver_function(uint8_t *payload, uint16_t length, const PJON_Packet_Info &packet_info) {
   // Hardware PINs
   if ((char)payload[0] == 'H') {
-    if ((char)payload[1] == ':') {
+    if ((char)payload[1] == '-') {
       String pin_num = String((char)payload[2]);
-      if ((char)payload[3] != ':')
+      if ((char)payload[3] != '-')
         pin_num += String((char)payload[3]);
       int pin_num_int = pin_num.toInt();
       if (pin_num_int > 1 && pin_num_int < 14) {
-        if ((char)payload[3] == ':' || (char)payload[4] == ':') {
+        if ((char)payload[3] == '-' || (char)payload[4] == '-') {
           int pin_status;
-          if ((char)payload[3] == ':') {
+          if ((char)payload[3] == '-') {
             pin_status = (char)payload[4] - '0';
           } else {
             pin_status = (char)payload[5] - '0';
@@ -54,7 +54,7 @@ void receiver_function(uint8_t *payload, uint16_t length, const PJON_Packet_Info
         packet = bus.reply("non-existent command", 20);
     }
   } else if ((char)payload[0] == 'T') {
-    if ((char)payload[1] == ':') {
+    if ((char)payload[1] == '-') {
       String test_num = String((char)payload[2]);
       if (test_num == "1") {
         test1 += 1;
@@ -62,7 +62,7 @@ void receiver_function(uint8_t *payload, uint16_t length, const PJON_Packet_Info
         itoa (test1, test1_char, 10);
         bus.reply(test1_char, String(test1).length());
       } else if (test_num == "2") {
-        if ((char)payload[3] == ':') {
+        if ((char)payload[3] == '-') {
           String command = String((char)payload[4]);
           if (command == "0") {
             test2_enabled = 0;
