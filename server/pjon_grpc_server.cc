@@ -38,7 +38,8 @@ PJON<ThroughSerial> bus(1);
 
 int debug = 0;
 uint64_t rcvd_cnt = 0;
-int client_query = 0;
+int client_query_id = 0;
+int send_requests = 2;
 std::string client_response = "";
 std::string response;
 std::vector<std::string> receives_array = {"", ""};
@@ -80,7 +81,8 @@ static void receiver_function(
   }
 
   // TODO: need implement additional check that we waiting exactly for this response, should be possible in PJON v10
-  if (client_query == packet_info.sender_id) {
+  // find(":") - as temp solution for avoid fault requests/responses
+  if (client_query_id == packet_info.sender_id and response.find(":") == std::string::npos) {
     client_response = response;
   } else {
     receives_array[0] = std::to_string(packet_info.sender_id);
@@ -164,16 +166,23 @@ class ArduinoServiceImpl final : public Arduino::Service {
     
     int node_id = request->node_id();
     const char* data = request->data().c_str();
-    client_query = node_id;
-    pjon_communication(node_id, data);
-    uint32_t time = micros();
-    while(micros() - time < 3000000) {
-      if (client_response != "") {
-        time = micros() - 3000000;
+    client_query_id = node_id;
+    int srequests = send_requests;
+    // small hack: repeat request if no response during 1.5 sec
+    while(srequests != 0) {
+      if (client_response == "") {
+        pjon_communication(node_id, data);
+        uint32_t time = micros();
+        while(micros() - time < 1500000) {
+          if (client_response != "") {
+            time = micros() - 1500000;
+          }
+        }
       }
+      srequests -= 1;
     }
     reply->set_message(client_response);
-    client_query = 0;
+    client_query_id = 0;
     client_response = "";
     return Status::OK;
   }
@@ -228,10 +237,10 @@ void grpc_client() {
           std::cout << "Arduino answered: " << reply << std::endl;
         if (reply == "done")
           receives_queue.pop();
-        delayMicroseconds(1000000);
+        delayMicroseconds(100000);
       }
     }
-    delayMicroseconds(1000000);
+    delayMicroseconds(100000);
   }
 }
 
