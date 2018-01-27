@@ -1,6 +1,6 @@
 HOST_SYSTEM = $(shell uname | cut -f 1 -d_)
 SYSTEM ?= $(HOST_SYSTEM)
-CXX = g++ -g
+CXX = g++
 CPPFLAGS += -I/usr/local/include -pthread
 CXXFLAGS += -std=c++11
 ifeq ($(SYSTEM),Darwin)
