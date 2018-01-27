@@ -4,6 +4,7 @@
 #include <thread>
 #include <queue>
 #include <vector>
+#include <ctime>
 // PJON library
 #define TS_RESPONSE_TIME_OUT 35000
 #define PJON_INCLUDE_TS true // Include only ThroughSerial
@@ -41,17 +42,43 @@ uint64_t rcvd_cnt = 0;
 int client_query_id = 0;
 int send_requests = 2;
 std::string client_response = "";
-std::string response;
+std::vector<std::array<std::string, 3>> check_messages_array;
 std::vector<std::string> receives_array = {"", ""};
 std::queue<std::vector<std::string>> receives_queue;
 
+
+void message_processing(std::string response, int packet_sender_id) {
+  int msg_accepted = 1;
+  if (check_messages_array.size() != 0) {
+    for (int i=0; i<check_messages_array.size(); ++i) {
+      if (time(0) - 5 >= std::stoi(check_messages_array[i][2])) {
+        check_messages_array.erase(check_messages_array.begin()+i);
+        i -= 1;
+      } else if (check_messages_array[i][0] == std::to_string(packet_sender_id) and check_messages_array[i][1] == response) {
+        msg_accepted = 0;
+        break;
+      }
+    }
+  }
+  if (msg_accepted == 1) {
+    check_messages_array.push_back({std::to_string(packet_sender_id), response, std::to_string(time(0))});
+    // TODO: need implement additional check that we waiting exactly for this response, should be possible in PJON v10
+    if (client_query_id == packet_sender_id and response.find(">") != std::string::npos) {
+      client_response = response;
+    } else if (response.find("<") != std::string::npos) {
+      receives_array[0] = std::to_string(packet_sender_id);
+      receives_array[1] = response;
+      receives_queue.push(receives_array);
+    }
+  }
+}
 
 static void receiver_function(
         uint8_t *payload,
         uint16_t length,
         const PJON_Packet_Info &packet_info){
 
-  response = "";
+  std::string response = "";
   for (uint32_t i = 0; i != length; i++){
     response += payload[i];
   }
@@ -79,22 +106,22 @@ static void receiver_function(
               << " data=" << response;
     std::cout << std::endl;
   }
-
-  // TODO: need implement additional check that we waiting exactly for this response, should be possible in PJON v10
-  // find(":") - as temp solution for avoid fault requests/responses
-  if (client_query_id == packet_info.sender_id and response.find(":") == std::string::npos) {
-    client_response = response;
-  } else {
-    receives_array[0] = std::to_string(packet_info.sender_id);
-    receives_array[1] = response;
-    receives_queue.push(receives_array);
-  }
+  message_processing(response, packet_info.sender_id);
 };
 
 static void error_handler_function(uint8_t code, uint8_t data) {
-  std::cout << "#ERR code=" << std::to_string(code);
-  std::cout << " data=" << std::to_string(data);
-  std::cout << std::endl;
+  if(code == PJON_CONNECTION_LOST) {
+    std::cout << "Connection with device ID " << std::to_string(bus.packets[data].content[0]) << " is lost." << std::endl;
+  }
+  if(code == PJON_PACKETS_BUFFER_FULL) {
+    std::cout << "#ERR code=" << std::to_string(code) << std::endl;
+    std::cout << "Packet buffer is full, has now a length of " << std::to_string(data) << std::endl;
+    std::cout << "Possible wrong bus configuration!" << std::endl;
+    std::cout << "higher PJON_MAX_PACKETS if necessary." << std::endl;
+  }
+  if(code == PJON_CONTENT_TOO_LONG) {
+    std::cout << "Content is too long, length: " << std::to_string(data) << std::endl;
+  }
 };
 
 bool is_enough_args(int argc, char **argv) {
@@ -166,24 +193,33 @@ class ArduinoServiceImpl final : public Arduino::Service {
     
     int node_id = request->node_id();
     const char* data = request->data().c_str();
+    std::string response = "";
     client_query_id = node_id;
     int srequests = send_requests;
-    // small hack: repeat request if no response during 1.5 sec
     while(srequests != 0) {
       if (client_response == "") {
         pjon_communication(node_id, data);
         uint32_t time = micros();
+        std::cout << data << std::endl;
         while(micros() - time < 1500000) {
           if (client_response != "") {
-            time = micros() - 1500000;
+            if (client_response.find(data) != std::string::npos or client_response.find("failed command") != std::string::npos) {
+              std::cout << data << std::endl;
+              std::cout << client_response << std::endl;
+              response = client_response;
+              time = micros() - 1500000;
+            }
           }
         }
       }
       srequests -= 1;
     }
-    reply->set_message(client_response);
+    std::cout << client_response << std::endl;
+    std::cout << response << std::endl;
+    reply->set_message(response);
     client_query_id = 0;
     client_response = "";
+    response = "";
     return Status::OK;
   }
 };
@@ -226,7 +262,7 @@ class ArduinoClient {
 };
 
 void grpc_client() {
-  ArduinoClient arduino(grpc::CreateChannel("localhost:50052", grpc::InsecureChannelCredentials()));
+  ArduinoClient arduino(grpc::CreateChannel("10.111.111.17:50052", grpc::InsecureChannelCredentials()));
   while(true) {
     if (receives_queue.size() != 0) {
       while(!receives_queue.empty()) {
@@ -246,7 +282,7 @@ void grpc_client() {
 
 void listen_on_bus() {
   while(true) {
-    bus.receive(1000);
+    bus.receive(3000);
     delayMicroseconds(500000);
   }
 }
@@ -318,7 +354,7 @@ int main(int argc, char** argv) {
     if (debug == 1)
       bus.set_error(error_handler_function);
     // with enabled ask we have repeated requests send time to time
-    bus.set_synchronous_acknowledge(false);
+    bus.set_synchronous_acknowledge(true);
     bus.set_crc_32(true);
 
     std::thread listen_on_bus_thd(listen_on_bus);
