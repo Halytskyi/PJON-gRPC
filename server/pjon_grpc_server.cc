@@ -6,12 +6,12 @@
 #include <vector>
 #include <ctime>
 // PJON library
-#define TS_RESPONSE_TIME_OUT 35000
+#define TS_RESPONSE_TIME_OUT 100000
 #define PJON_INCLUDE_TS true // Include only ThroughSerial
 #ifndef RPI
   #define RPI true
 #endif
-#include "PJON/PJON.h"
+#include "PJON.h"
 #include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
@@ -109,7 +109,7 @@ static void receiver_function(
   message_processing(response, packet_info.sender_id);
 };
 
-static void error_handler_function(uint8_t code, uint8_t data) {
+static void error_handler_function(uint8_t code, uint16_t data, void *custom_pointer) {
   if(code == PJON_CONNECTION_LOST) {
     std::cout << "Connection with device ID " << std::to_string(bus.packets[data].content[0]) << " is lost." << std::endl;
   }
@@ -262,7 +262,7 @@ class ArduinoClient {
 };
 
 void grpc_client() {
-  ArduinoClient arduino(grpc::CreateChannel("10.111.111.17:50052", grpc::InsecureChannelCredentials()));
+  ArduinoClient arduino(grpc::CreateChannel("10.111.111.14:50052", grpc::InsecureChannelCredentials()));
   while(true) {
     if (receives_queue.size() != 0) {
       while(!receives_queue.empty()) {
