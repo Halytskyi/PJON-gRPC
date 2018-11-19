@@ -1,7 +1,7 @@
 HOST_SYSTEM = $(shell uname | cut -f 1 -d_)
 SYSTEM ?= $(HOST_SYSTEM)
 CXX = g++
-CPPFLAGS += -I/usr/local/include -I/opt/libraries/PJON/src -pthread
+CPPFLAGS += -I/usr/local/include -I/opt/libraries/PJON/src -Ilibraries/inih -pthread
 CXXFLAGS += -std=c++11
 ifeq ($(SYSTEM),Darwin)
 LDFLAGS += -L/usr/local/lib `pkg-config --libs grpc++ grpc`       \
