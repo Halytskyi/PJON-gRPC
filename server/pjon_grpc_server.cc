@@ -40,25 +40,28 @@ using pjongrpc::Arduino;
 std::string config_file = "conf/pjon-grpc.cfg";
 INIReader reader(config_file);
 bool debug = reader.GetBoolean("main", "debug", false);
+bool receiver = reader.GetBoolean("module", "receiver", true);
 int master_id = reader.GetInteger("module", "master-id", 1);
 int retry_requests = reader.GetInteger("module", "retry-requests", 0);
-bool grpc_receiver = reader.GetBoolean("module", "grpc-receiver", false);
+std::string delimiter_transmit = reader.Get("module", "delimiter-transmit", ">");
+bool transmitter = reader.GetBoolean("module", "transmitter", false);
+std::string delimiter_receive = reader.Get("module", "delimiter-receive", "<");
 
 PJON<ThroughSerialAsync> bus(master_id);
 
 uint64_t rcvd_cnt = 0;
-std::string delimiter_in = "<";
-std::string delimiter_out = ">";
 std::vector<std::array<std::string, 3>> check_messages_array;
 std::vector<std::string> receives_array = {"", ""};
 std::queue<std::vector<std::string>> receives_queue;
 
 
 void message_processing(std::string response, int packet_sender_id) {
-  if (response.find(delimiter_out) != std::string::npos) {
-    check_messages_array.push_back({std::to_string(packet_sender_id), response, std::to_string(time(0))});
-  } else if (response.find(delimiter_in) != std::string::npos) {
-    if (grpc_receiver) {
+  if (response.find(delimiter_transmit) != std::string::npos) {
+    if (receiver) {
+      check_messages_array.push_back({std::to_string(packet_sender_id), response, std::to_string(time(0))});
+    }
+  } else if (response.find(delimiter_receive) != std::string::npos) {
+    if (transmitter) {
       receives_array[0] = std::to_string(packet_sender_id);
       receives_array[1] = response;
       receives_queue.push(receives_array);
@@ -181,7 +184,7 @@ void run_server(std::string bind_ip) {
         while(micros() - time_start < 1000000) {
           if (check_messages_array.size() != 0) {
             for (int i=0; i<check_messages_array.size(); ++i) {
-              std::string response_data = check_messages_array[i][1].substr(0, check_messages_array[i][1].find(delimiter_out));
+              std::string response_data = check_messages_array[i][1].substr(0, check_messages_array[i][1].find(delimiter_transmit));
               if (time(0) - 3 >= std::stoi(check_messages_array[i][2])) {
                 check_messages_array.erase(check_messages_array.begin()+i);
                 i -= 1;
@@ -273,6 +276,11 @@ int main(int argc, char** argv) {
     return 1;
   }
 
+  if (! transmitter and ! receiver) {
+    std::cout << "'transmitter' and 'receiver' disabled. You should enable at least one of them" << std::endl;
+    return 1;
+  }
+
   try {
     if (debug)
       std::cout << "Opening serial..." << std::endl;
@@ -299,14 +307,21 @@ int main(int argc, char** argv) {
     bus.set_crc_32(true);
     bus.set_packet_id(true);
 
-    std::thread listen_on_bus_thd(listen_on_bus);
-    listen_on_bus_thd.detach();
-    if (grpc_receiver) {
+    if (transmitter) {
       std::thread grpc_client_thd(grpc_client, grpc_server_ip);
       grpc_client_thd.detach();
     }
 
-    run_server(bind_ip);
+    std::thread listen_on_bus_thd(listen_on_bus);
+    if (! receiver) {
+      listen_on_bus_thd.join();
+    } else {
+      listen_on_bus_thd.detach();
+    }
+
+    if (receiver) {
+      run_server(bind_ip);
+    }
     return 0;
   }
   catch (const char* msg) {
