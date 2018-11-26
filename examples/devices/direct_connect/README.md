@@ -1,4 +1,6 @@
-This example show how possible control Arduino PINs or send messages to RPi/PC via PJON-gRPC tool. Arduino connected directly to RPi through serial (USB).
+This example show how possible control Arduino PINs or send messages to RPi/PC via PJON-gRPC tool.
+
+Arduino connected directly to RPi through serial (USB).
 
 ### Examples
 **Note:** use python client '[pjon_grpc_client.py](../../clients/python/pjon_grpc_client.py)' on RPi/PC side
