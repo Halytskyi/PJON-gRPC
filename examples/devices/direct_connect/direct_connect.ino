@@ -2,11 +2,11 @@
  *  This example show how possible control Arduino PINs or send messages to RPi/PC via PJON-gRPC tool
  *
  *  Examples (use python client 'pjon_grpc_client.py' on RPi/PC side):
- *  Read Hardware Digital PIN (digitalRead(13)): ./pjon_grpc_client.py 11 H-13
- *  Read Hardware Analog PIN (analogRead(14)): ./pjon_grpc_client.py 11 H-14
- *  Write Hardware Digital PIN (digitalWrite(13, 1)): ./pjon_grpc_client.py 11 H-13-1
- *  Read Virtual PIN: ./pjon_grpc_client.py 11 V-0
- *  Write Virtual PIN: ./pjon_grpc_client.py 11 V-0-1
+ *  Read Hardware Digital PIN (digitalRead(13)): ./pjon_grpc_client.py 1 11 H-13
+ *  Read Hardware Analog PIN (analogRead(14)): ./pjon_grpc_client.py 1 11 H-14
+ *  Write Hardware Digital PIN (digitalWrite(13, 1)): ./pjon_grpc_client.py 1 11 H-13-1
+ *  Read Virtual PIN: ./pjon_grpc_client.py 1 11 V-0
+ *  Write Virtual PIN: ./pjon_grpc_client.py 1 11 V-0-1
  *  Enable sending messages every 1 second from Arduino to RPi/PC: ./pjon_grpc_client.py 1 11 M-1
  *
  */

@@ -1,7 +1,7 @@
 This example show how possible control Arduino PINs or send messages to RPi/PC via PJON-gRPC tool. Arduino connected directly to RPi through serial (USB).
 
 ### Examples
-Note: use python client '[pjon_grpc_client.py](examples/clients/python/pjon_grpc_client.py)' on RPi/PC side):
+*Note:* use python client '[pjon_grpc_client.py](../../clients/python/pjon_grpc_client.py)' on RPi/PC side
 
 Read Hardware Digital PIN (_digitalRead(13)_):
 ```
@@ -39,7 +39,7 @@ $ ./pjon_grpc_client.py 1 11 T
 Client received: T>wrong command
 ```
 
-#### Example of sending messages Arduino -> RPi/PC. Use '[pjon_grpc_clientserver.py](examples/clients/python/pjon_grpc_clientserver.py)' for tests
+#### Example of sending messages 'Arduino -> RPi/PC'. Use '[pjon_grpc_clientserver.py](../../clients/python/pjon_grpc_clientserver.py)' for tests
 Enable sending messages every 1 second from Arduino to RPi/PC:
 ```
 $ ./pjon_grpc_client.py 1 11 M-1
