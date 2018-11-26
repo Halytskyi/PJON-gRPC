@@ -58,5 +58,3 @@ Client-Server received: node_id=11, data=<Incoming message every 1 sec
 Client-Server received: node_id=11, data=<Incoming message every 1 sec
 ...
 ```
-
-`Makefile` - for compiling code and flashing it to Arduino directly from RPi (see https://github.com/sudar/Arduino-Makefile)

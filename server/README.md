@@ -1,8 +1,8 @@
 ### gRPC server-client for PJON bus
 
-#### Install gRPC
+#### Install gRPC and wiringPi
 ```
-$ sudo apt-get install build-essential autoconf libtool
+$ sudo apt-get install build-essential autoconf libtool wiringpi
 $ mkdir /opt/libraries && cd /opt/libraries
 $ git clone -b $(curl -L https://grpc.io/release) https://github.com/grpc/grpc
 $ cd grpc && git submodule update --init
