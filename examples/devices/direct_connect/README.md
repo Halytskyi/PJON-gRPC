@@ -3,6 +3,8 @@ This example show how possible control Arduino PINs or send messages to RPi/PC v
 ### Examples
 **Note:** use python client '[pjon_grpc_client.py](../../clients/python/pjon_grpc_client.py)' on RPi/PC side
 
+#### Examples "request -> response"
+
 Read Hardware Digital PIN (_digitalRead(13)_):
 ```
 $ ./pjon_grpc_client.py 1 11 H-13
@@ -39,8 +41,8 @@ $ ./pjon_grpc_client.py 1 11 T
 Client received: T>wrong command
 ```
 
-#### Example of sending messages 'Arduino -> RPi/PC'.
-**Note:** Use '[pjon_grpc_clientserver.py](../../clients/python/pjon_grpc_clientserver.py)' for receiving messages on RPi/PC side.
+#### Example of sending messages 'Arduino -> RPi/PC'
+**Note:** Use '[pjon_grpc_clientserver.py](../../clients/python/pjon_grpc_clientserver.py)' for receiving messages on RPi/PC side
 
 Enable sending messages every 1 second from Arduino to RPi/PC:
 ```
