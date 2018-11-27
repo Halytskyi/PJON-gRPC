@@ -1,8 +1,10 @@
-**router_extender** - communication between devices with different strategies
+**router_extender** - communication between RPi and devices with different strategies
 
-RPi <—--ThroughSerial---> Arduino (router) <—--SoftwareBitBang--—> Arduino (client)
+RPi <—--ThroughSerial---> Arduino (router) <—--SoftwareBitBang--—> Arduino (device1)
 
-*Extender* - firmware for Arduino-router
+**router** - firmware for Arduino router
+
+**device1** - firmware for Arduino device which connected to Arduino router via '[SoftwareBitBang](https://github.com/gioblu/PJON/tree/master/src/strategies/SoftwareBitBang)' strategy
 
 *SoftwareBitBang* - firmware for Arduino-client which communicate with Arduino-router via SoftwareBitBang strategy
 
