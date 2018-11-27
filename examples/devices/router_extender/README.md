@@ -5,6 +5,3 @@ RPi <—--ThroughSerial---> Arduino (router) <—--SoftwareBitBang--—> Arduino
 **router** - firmware for Arduino router
 
 **device1** - firmware for Arduino device which connected to Arduino router via '[SoftwareBitBang](https://github.com/gioblu/PJON/tree/master/src/strategies/SoftwareBitBang)' strategy
-
-*SoftwareBitBang* - firmware for Arduino-client which communicate with Arduino-router via SoftwareBitBang strategy
-
