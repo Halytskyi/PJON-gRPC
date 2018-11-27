@@ -50,7 +50,7 @@ Client received: T>wrong command
 ```
 
 #### Example of sending messages 'Arduino -> RPi/PC'
-**Note:** Use '[pjon_grpc_clientserver.py](../../clients/python/pjon_grpc_clientserver.py)' for receiving messages on RPi/PC side
+**Note:** Use '[pjon_grpc_clientserver.py](../../../clients/python/pjon_grpc_clientserver.py)' for receiving messages on RPi/PC side
 
 Enable sending messages every 1 second from Arduino to RPi/PC:
 ```
