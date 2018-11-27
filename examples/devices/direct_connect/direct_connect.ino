@@ -2,12 +2,13 @@
  *  This example show how possible control Arduino PINs or send messages to RPi/PC via PJON-gRPC tool
  *
  *  Examples (use python client 'pjon_grpc_client.py' on RPi/PC side):
- *  Read Hardware Digital PIN (digitalRead(13)): ./pjon_grpc_client.py 1 11 H-13
- *  Read Hardware Analog PIN (analogRead(14)): ./pjon_grpc_client.py 1 11 H-14
- *  Write Hardware Digital PIN (digitalWrite(13, 1)): ./pjon_grpc_client.py 1 11 H-13-1
- *  Read Virtual PIN: ./pjon_grpc_client.py 1 11 V-0
- *  Write Virtual PIN: ./pjon_grpc_client.py 1 11 V-0-1
- *  Enable sending messages every 1 second from Arduino to RPi/PC: ./pjon_grpc_client.py 1 11 M-1
+ *  Read Hardware Digital PIN (digitalRead(13)): ./pjon_grpc_client.py 1 21 H-13
+ *  Read Hardware Analog PIN (analogRead(14)): ./pjon_grpc_client.py 1 21 H-14
+ *  Write Hardware Digital PIN (digitalWrite(13, 1)): ./pjon_grpc_client.py 1 21 H-13-1
+ *  Read Virtual PIN: ./pjon_grpc_client.py 1 21 V-0
+ *  Write Virtual PIN: ./pjon_grpc_client.py 1 21 V-0-1
+ *  Increase number with each request: ./pjon_grpc_client.py 1 21 N
+ *  Enable sending messages every 1 second from Arduino to RPi/PC: ./pjon_grpc_client.py 1 21 M-1
  *
  */
 
@@ -16,7 +17,7 @@
 #define PJON_INCLUDE_TSA true // Include only ThroughSerial
 #include <PJON.h>
 
-PJON<ThroughSerialAsync> bus(11);
+PJON<ThroughSerialAsync> bus(21);
 
 // For test virtual PINs
 uint8_t vPIN[2] = { 0, 0 };
@@ -24,6 +25,7 @@ uint8_t vPIN[2] = { 0, 0 };
 int master_id = 1; // Master ID (appication 'pjon_grpc_server' running on RPi)
 int send_msg_repeatedly = 0;
 unsigned long prevMillis = millis();
+int n = 0;
 
 void bus_reply(String response_str) {
   int response_str_len = response_str.length();
@@ -120,6 +122,10 @@ void receiver_function(uint8_t *payload, uint16_t length, const PJON_Packet_Info
       String response_str = "M>" + String(send_msg_repeatedly);
       bus_reply(response_str);
     }
+  } else if ((char)payload[0] == 'N') {
+    n += 1;
+    String response_str = "N>" + String(n);
+    bus_reply(response_str);
   } else {
     wrong_command(payload, length);
   }
