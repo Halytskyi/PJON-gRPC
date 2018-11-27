@@ -37,11 +37,10 @@ Read again the same PIN (after write):
 $ ./pjon_grpc_client.py 1 21 V-0
 Client received: V-0>1
 ```
-Increase number with each request:
+Make test, number in response will be increased on 1:
 ```
-$ ./pjon_grpc_client.py 1 21 N
+$ for i in $(seq 1 2); do ./pjon_grpc_client.py 1 21 N; done
 Client received: N>1
-$ ./pjon_grpc_client.py 1 21 N
 Client received: N>2
 ```
 Wrong command:
