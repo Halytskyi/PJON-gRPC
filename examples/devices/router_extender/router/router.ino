@@ -1,15 +1,16 @@
-#define TS_RESPONSE_TIME_OUT 35000
-#define PJON_INCLUDE_TS true // Include ThroughSerial
-#define PJON_INCLUDE_SWBB true // Include SoftwareBitBang
+#define PJON_INCLUDE_PACKET_ID true
+#define TSA_RESPONSE_TIME_OUT 100000
+#define PJON_INCLUDE_TSA true
+#define PJON_INCLUDE_SWBB true
 #include <PJON.h>
 
-const uint8_t DEVICE_ID = 50;
+const uint8_t DEVICE_ID = 11;
 
-PJON<ThroughSerial> busA(DEVICE_ID);
+PJON<ThroughSerialAsync> busA(DEVICE_ID);
 PJON<SoftwareBitBang> busB(DEVICE_ID);
 
 // All packets to devices listed here will be forwarded to bus B
-const uint8_t device_id_ranges_on_B_side[] = {11, 20};
+const uint8_t device_id_ranges_on_B_side[] = {21, 50};
 
 
 bool is_device_on_B_side(uint8_t device_id) {
@@ -24,8 +25,17 @@ void receiver_functionA(uint8_t *payload, uint16_t length, const PJON_Packet_Inf
   // Forward packet to B segment of local bus
   if (is_device_on_B_side(packet_info.receiver_id)) {
     busA.strategy.send_response(PJON_ACK);
-    busB.send_from_id(packet_info.sender_id, packet_info.sender_bus_id,
-      packet_info.receiver_id, packet_info.receiver_bus_id, payload, length, packet_info.header);
+    busB.send_from_id(
+      packet_info.sender_id,
+      packet_info.sender_bus_id,
+      packet_info.receiver_id,
+      packet_info.receiver_bus_id,
+      (char *)payload,
+      length,
+      packet_info.header,
+      packet_info.id,
+      packet_info.port
+    );
   }
 }
 
@@ -33,20 +43,29 @@ void receiver_functionB(uint8_t *payload, uint16_t length, const PJON_Packet_Inf
   // Forward packet to A segment of local bus
   if (!is_device_on_B_side(packet_info.receiver_id)) {
     busB.strategy.send_response(PJON_ACK);
-    busA.send_from_id(packet_info.sender_id, packet_info.sender_bus_id,
-      packet_info.receiver_id, packet_info.receiver_bus_id, payload, length, packet_info.header);
+    busA.send_from_id(
+      packet_info.sender_id,
+      packet_info.sender_bus_id,
+      packet_info.receiver_id,
+      packet_info.receiver_bus_id,
+      (char *)payload,
+      length,
+      packet_info.header,
+      packet_info.id,
+      packet_info.port
+    );
   }
 }
 
 void loop() {
-  busA.receive(3000);
+  busA.receive();
   busB.update();
-  busB.receive(14000);
+  busB.receive();
   busA.update();
 };
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
 
   // PRi
   busA.strategy.set_serial(&Serial);
@@ -54,13 +73,15 @@ void setup() {
   busA.set_synchronous_acknowledge(true);
   busA.set_crc_32(true);
   busA.set_router(true);
+  busA.set_packet_id(true);
   busA.begin();
 
-  // Devices
-  busB.strategy.set_pin(7);
+  // Devices via SoftwareBitBang
+  busB.strategy.set_pin(12);
   busB.set_receiver(receiver_functionB);
   busB.set_synchronous_acknowledge(true);
   busB.set_crc_32(true);
   busB.set_router(true);
+  busB.set_packet_id(true);
   busB.begin();
 }
