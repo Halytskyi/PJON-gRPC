@@ -2,21 +2,24 @@
  *  This example show how possible control Arduino PINs or send messages to RPi/PC via 'router'
  *
  *  Examples (use python client 'pjon_grpc_client.py' on RPi/PC side):
- *  Read Hardware Digital PIN (digitalRead(13)): ./pjon_grpc_client.py 1 21 H-13
- *  Read Hardware Analog PIN (analogRead(14)): ./pjon_grpc_client.py 1 21 H-14
- *  Write Hardware Digital PIN (digitalWrite(13, 1)): ./pjon_grpc_client.py 1 21 H-13-1
- *  Read Virtual PIN: ./pjon_grpc_client.py 1 21 V-0
- *  Write Virtual PIN: ./pjon_grpc_client.py 1 21 V-0-1
- *  Increase number with each request: ./pjon_grpc_client.py 1 21 N
- *  Enable sending messages every 1 second from Arduino to RPi/PC: ./pjon_grpc_client.py 1 21 M-1
+ *  Read Hardware Digital PIN (digitalRead(13)): ./pjon_grpc_client.py 1 51 H-13
+ *  Read Hardware Analog PIN (analogRead(14)): ./pjon_grpc_client.py 1 51 H-14
+ *  Write Hardware Digital PIN (digitalWrite(13, 1)): ./pjon_grpc_client.py 1 51 H-13-1
+ *  Read Virtual PIN: ./pjon_grpc_client.py 1 51 V-0
+ *  Write Virtual PIN: ./pjon_grpc_client.py 1 51 V-0-1
+ *  Increase number with each request: ./pjon_grpc_client.py 1 51 N
+ *  Enable sending messages every 1 second from Arduino to RPi/PC: ./pjon_grpc_client.py 1 51 M-1
  *
  */
 
 #define PJON_INCLUDE_PACKET_ID true
-#define PJON_INCLUDE_SWBB true // Include SoftwareBitBang only
+#define TSA_RESPONSE_TIME_OUT 100000
+#define PJON_INCLUDE_TSA true
 #include <PJON.h>
+#include <SoftwareSerial.h>
 
-PJON<SoftwareBitBang> bus(21);
+SoftwareSerial HC12(2, 3);
+PJON<ThroughSerialAsync> bus(51);
 
 // For test virtual PINs
 uint8_t vPIN[2] = { 0, 0 };
@@ -146,7 +149,8 @@ void setup() {
   pinMode(13, OUTPUT);
   digitalWrite(13, LOW);
 
-  bus.strategy.set_pin(12);
+  HC12.begin(9600);
+  bus.strategy.set_serial(&HC12);
   bus.set_receiver(receiver_function);
   bus.set_synchronous_acknowledge(true);
   bus.set_crc_32(true);
