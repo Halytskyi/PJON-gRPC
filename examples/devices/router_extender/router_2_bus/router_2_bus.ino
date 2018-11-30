@@ -105,9 +105,9 @@ void loop() {
   busA.update();
   busB.receive();
   busA.update();
-  busB.update();
   busC.receive();
   busA.update();
+  busB.update();
   busC.update();
 };
 

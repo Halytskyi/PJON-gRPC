@@ -1,6 +1,6 @@
-This example show how possible control Arduino PINs or send messages to RPi/PC via '[router](../router)'
+This example show how possible control Arduino PINs or send messages to RPi/PC via '[router](../router_1_bus)'
 
-This device connected to '[router](../router)' via '[SoftwareBitBang](https://github.com/gioblu/PJON/tree/master/src/strategies/SoftwareBitBang)' strategy
+This device connected to '[router](../router_1_bus)' via '[SoftwareBitBang](https://github.com/gioblu/PJON/tree/master/src/strategies/SoftwareBitBang)' strategy
 
 ### Examples
 **Note:** use python client '[pjon_grpc_client.py](../../../clients/python/pjon_grpc_client.py)' on RPi/PC side

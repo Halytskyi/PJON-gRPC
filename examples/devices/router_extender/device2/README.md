@@ -1,6 +1,6 @@
 This example show how possible control Arduino PINs or send messages to RPi/PC via '[router](../router_2_bus)'
 
-This device connected to '[router](../router)' via '[ThroughSerialAsync](https://github.com/gioblu/PJON/tree/master/src/strategies/ThroughSerialAsync)' strategy ([HC-12 module](http://statics3.seeedstudio.com/assets/file/bazaar/product/HC-12_english_datasheets.pdf))
+This device connected to '[router](../router_2_bus)' via '[ThroughSerialAsync](https://github.com/gioblu/PJON/tree/master/src/strategies/ThroughSerialAsync)' strategy ([HC-12 module](http://statics3.seeedstudio.com/assets/file/bazaar/product/HC-12_english_datasheets.pdf))
 
 ### Examples
 **Note:** use python client '[pjon_grpc_client.py](../../../clients/python/pjon_grpc_client.py)' on RPi/PC side
