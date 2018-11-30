@@ -132,7 +132,7 @@ void setup() {
   busB.set_packet_id(true);
   busB.begin();
 
-  // Devices via HC-12 (ThroughSerialAsync)
+  // Devices via ThroughSerialAsync (HC-12 module)
   HC12.begin(9600);
   busC.strategy.set_serial(&HC12);
   busC.set_receiver(receiver_functionC);
