@@ -12,7 +12,8 @@ PJON-gRPC is a server-client interface for linux-based machines (scripts can be 
 - Communication between RPi/PC and devices (like Arduino) through any [PJON strategies](https://github.com/gioblu/PJON/blob/master/documentation/configuration.md) via [router](examples/devices/router_extender)
 - Can be configured for working with 2 modules at the same time (see [pjon-grpc.cfg](server/conf/pjon-grpc.cfg)). Logic isolated in separate threads for maximum performance. Very useful if need to distribute the load, for example, `1st module` can be configured for accept and response on requests, `2nd module` can be configured for accept only incoming messages.
 
-**Required** PJON version *>11.1*
+**Required** PJON version >[11.1](https://github.com/gioblu/PJON/tree/11.1)
+
 **Tested** and fully compatible with [master branch](https://github.com/gioblu/PJON/tree/master)
 
 #### Video example
