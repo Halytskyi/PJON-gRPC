@@ -13,7 +13,6 @@
 #ifndef RPI
   #define RPI true
 #endif
-
 #include <PJON.h>
 #include <inttypes.h>
 #include <stdlib.h>
