@@ -1,6 +1,6 @@
 HOST_SYSTEM = $(shell uname | cut -f 1 -d_)
 SYSTEM ?= $(HOST_SYSTEM)
-CXX = g++
+CXX = g++ -DLINUX
 CPPFLAGS += -I/usr/local/include -I/opt/libraries/PJON/src -Ilibraries/inih -pthread
 CXXFLAGS += -std=c++11
 ifeq ($(SYSTEM),Darwin)

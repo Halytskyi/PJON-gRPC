@@ -1,3 +1,5 @@
-**clients** - examples of applications which running on RPi/PC side
+# Examples
 
-**devices** - examples of Arduino sketches
+[clients](clients) - examples of applications which running on RPi/PC side
+
+[devices](devices) - examples of Arduino sketches

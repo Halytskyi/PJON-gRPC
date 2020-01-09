@@ -1,5 +1,5 @@
 // Common libraries
-#include "INIReader.h"
+#include <INIReader.h>
 #include "version.h"
 #include <stdio.h>
 #include <thread>
@@ -13,7 +13,8 @@
 #ifndef RPI
   #define RPI true
 #endif
-#include "PJON.h"
+
+#include <PJON.h>
 #include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
