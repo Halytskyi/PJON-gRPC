@@ -8,7 +8,7 @@
 apt-get install wiringpi libgrpc++ -y
 ```
 
-Download binary from [releases](releases)
+Download binary from [releases](https://github.com/Halytskyi/PJON-gRPC/releases)
 
 ## Compilation from sources
 

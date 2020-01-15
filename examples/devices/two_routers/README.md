@@ -5,6 +5,8 @@ This is the best setup for good stability and performance when need transmit-rec
 ![Diagram](images/PJON-gRPC_two_routers.jpg)
 [<img src="images/PJON-gRPC_two_routers_photo1.jpg" alt="PJON-gRPC_two_routers" width="300"/>](images/PJON-gRPC_two_routers_photo1.jpg) [<img src="images/PJON-gRPC_two_routers_photo2.jpg" alt="PJON-gRPC_two_routers" width="300"/>](images/PJON-gRPC_two_routers_photo2.jpg)
 
+Video: [https://youtu.be/R4MZhWncfPs](https://youtu.be/R4MZhWncfPs)
+
 [router_RxTx_bus1](router_RxTx_bus1) - sketch for Arduino router which allow RPi communicate with devices (transmit-receive) connected to one PJON bus
 
 [router_Tx_bus2](router_Tx_bus2) - sketch for Arduino router which allow RPi receive messages from devices connected to another one physical bus
