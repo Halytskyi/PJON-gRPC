@@ -24,6 +24,4 @@ For maximum stability and performance recommended to use separated modules for `
 
 ## Video for example described under [two routers](examples/devices/two_routers)
 
-<video src="video/PJON-gRPC.mp4" width="640" height="360" autoplay loop preload controls></video>
-
 [https://youtu.be/R4MZhWncfPs](https://youtu.be/R4MZhWncfPs)
