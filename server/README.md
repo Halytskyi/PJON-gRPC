@@ -1,6 +1,16 @@
 # gRPC server-client for PJON bus
 
-## Installation
+## Use binary
+
+### Install dependencies
+
+```bash
+apt-get install wiringpi libgrpc++ -y
+```
+
+Download binary from [releases](releases)
+
+## Compilation from sources
 
 ### Install WiringPi
 

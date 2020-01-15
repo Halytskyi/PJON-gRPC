@@ -6,9 +6,9 @@ This device connected to [router_2_bus](../router_2_bus) via [ThroughSerialAsync
 
 ## Examples
 
-**Note:** from RPi/PC side uses python client: [pjon_grpc_client.py](../../../clients/python/pjon_grpc_client.py)
+### Examples of request <-> response (RPi/PC <-> Arduino)
 
-### Examples of request -> response (RPi/PC -> Arduino)
+**Note:** from RPi/PC side uses python client: [pjon_grpc_client.py](../../../clients/python/pjon_grpc_client.py)
 
 Read Hardware Digital PIN (_digitalRead(13)_):
 

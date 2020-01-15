@@ -1,6 +1,6 @@
 # PJON-gRPC
 
-PJON-gRPC is a server-client interface for linux-based machines (applications can be written on [different languages](https://grpc.io/docs/)) and devices Arduino, ATtiny, ATmega, ESP8266, etc.
+PJON-gRPC is a client-server application for linux-based machines for communication with remote devices like Arduino, ATtiny, ATmega, ESP8266, etc.
 
 ## Components
 
@@ -13,7 +13,8 @@ PJON-gRPC is a server-client interface for linux-based machines (applications ca
 - Receive requests from application located on RPi/PC (via gRPC, for example [pjon_grpc_client.py](examples/clients/python/pjon_grpc_client.py)) and send back responses from devices (like Arduino) connected with RPi through PJON [ThroughSerialAsync](https://github.com/gioblu/PJON/tree/master/src/strategies/ThroughSerialAsync) strategy.
 - Receive and forward messages to application located on RPi/PC from devices through PJON [ThroughSerialAsync](https://github.com/gioblu/PJON/tree/master/src/strategies/ThroughSerialAsync) strategy (via gRPC, for example [pjon_grpc_clientserver.py](examples/clients/python/pjon_grpc_clientserver.py))
 - Communication between RPi/PC and devices (like Arduino) through any [PJON strategies](https://github.com/gioblu/PJON/blob/master/documentation/configuration.md) via [router](examples/devices/router_extender)
-- Can be configured for working with 2 modules at the same time (see [pjon-grpc.cfg](server/conf/pjon-grpc.cfg)). Logic isolated in separate threads for maximum performance. Very useful if need to distribute the load, for example, `1st module` can be configured for accept and response on requests, `2nd module` can be configured for accept only incoming messages.
+
+For maximum stability and performance recommended to use separated modules for `transmit-receive` and `receive only` operations with separated physical busses. With this configuration wasn't detected any issues while sending/receiving messages each 0.2 seconds. See examples [two routers](examples/devices/two_routers)
 
 ## Tested with
 
@@ -21,6 +22,8 @@ PJON-gRPC is a server-client interface for linux-based machines (applications ca
 **Device:** [Raspberry Pi 3](https://www.raspberrypi.org/products/raspberry-pi-3-model-b/)<br>
 **OS:** [Raspbian buster](https://www.raspberrypi.org/downloads/raspbian/)
 
-## Video example (for old version, will be changed)
+## Video for example described under [two routers](examples/devices/two_routers)
 
-https://www.youtube.com/watch?v=J8FVPZW4y4I
+<video src="video/PJON-gRPC.mp4" width="640" height="360" autoplay loop preload controls></video>
+
+[https://youtu.be/R4MZhWncfPs](https://youtu.be/R4MZhWncfPs)
