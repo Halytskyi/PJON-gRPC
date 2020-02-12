@@ -2,6 +2,7 @@
 
 from concurrent import futures
 import time
+import datetime
 
 import grpc
 import pjongrpc_pb2
@@ -13,7 +14,7 @@ _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
 class Arduino(pjongrpc_pb2_grpc.ArduinoServicer):
     def RPiArduino(self, request, context):
-        print("Client-Server received: node_id=%d, data=%s" % (request.node_id, request.data))
+        print("%s: Client-Server received: node_id=%d, data=%s" % (datetime.datetime.now(), request.node_id, request.data))
         return pjongrpc_pb2.Arduino_Reply(message='done')
 
 def serv1():
