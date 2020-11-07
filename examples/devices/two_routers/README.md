@@ -15,4 +15,4 @@ Video: [https://youtu.be/R4MZhWncfPs](https://youtu.be/R4MZhWncfPs)
 
 **Notes:**
 - for each router should be runned separate [PJON gRPC Server](../../../server)
-- examples compatible with PJON version [13.0](https://github.com/gioblu/PJON/tree/13.0) and PJON-gRPC version [4.0](https://github.com/Halytskyi/PJON-gRPC/releases/tag/4.0)
+- examples compatible with [PJON v13.0](https://github.com/gioblu/PJON/tree/13.0) and [PJON-gRPC v4.0](https://github.com/Halytskyi/PJON-gRPC/tree/4.0)
