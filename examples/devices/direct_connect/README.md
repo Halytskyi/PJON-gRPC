@@ -86,3 +86,5 @@ Client-Server received: node_id=21, data=<Incoming message every 1 sec
 Client-Server received: node_id=21, data=<Incoming message every 1 sec
 ...
 ```
+
+**Note:** examples compatible with PJON version [12.0](https://github.com/gioblu/PJON/tree/12.0) and PJON-gRPC version [3.0](https://github.com/Halytskyi/PJON-gRPC/releases/tag/3.0)

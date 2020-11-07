@@ -27,9 +27,27 @@ python -m grpc_tools.protoc -Iprotos --python_out=. --grpc_python_out=. protos/p
 
 [pjon_grpc_client.py](pjon_grpc_client.py) - client for sending requests to devices and getting responses
 
+### Change command value
+
+```bash
+$ ./pjon_grpc_client.py 1 11 n=2
+Client received: n=2>ok
+```
+
+where:
+
+```bash
+1 - master ID
+11 - device ID
+n=2 - command
+n=2>ok - command successful
+```
+
+### Get command value
+
 ```bash
 $ ./pjon_grpc_client.py 1 11 n
-Client received: n>1
+Client received: n>2
 ```
 
 where:
@@ -38,6 +56,7 @@ where:
 1 - master ID
 11 - device ID
 n - command
+n>2 - value 2 for command n
 ```
 
 [pjon_grpc_clientserver.py](pjon_grpc_clientserver.py) - client-server script for receiving messages from devices (works in daemon mode)

@@ -7,22 +7,16 @@
 #include <vector>
 #include <ctime>
 // PJON library
-#define PJON_INCLUDE_PACKET_ID true
-#define TSA_RESPONSE_TIME_OUT 100000
-#define PJON_INCLUDE_TSA true
 #ifndef RPI
   #define RPI true
 #endif
-#include <PJON.h>
-#include <inttypes.h>
-#include <stdlib.h>
-#include <string.h>
+#define PJON_INCLUDE_PACKET_ID
+#define TS_RESPONSE_TIME_OUT 150000
+#include <PJONThroughSerial.h>
 // RPI serial interface
 #include <wiringPi.h>
 #include <wiringSerial.h>
 // gRPC library
-#include <iostream>
-#include <memory>
 #include <grpc++/grpc++.h>
 #include "pjongrpc.grpc.pb.h"
 
@@ -44,10 +38,11 @@ bool debug = reader.GetBoolean("main", "debug", false);
 bool receiver = reader.GetBoolean("main", "receiver", false);
 int retry_requests = reader.GetInteger("main", "retry-requests", 0);
 std::string delimiter_transmit = reader.Get("main", "delimiter-transmit", ">");
+std::string error_name = reader.Get("main", "error-name", "err");
 bool transmitter = reader.GetBoolean("main", "transmitter", false);
 std::string delimiter_receive = reader.Get("main", "delimiter-receive", "<");
 
-PJON<ThroughSerialAsync> bus(master_id);
+PJONThroughSerial bus(master_id);
 
 uint64_t rcvd_cnt = 0;
 std::vector<std::array<std::string, 3>> check_messages_array;
@@ -72,19 +67,18 @@ static void receiver_function(uint8_t *payload, uint16_t length, const PJON_Pack
   }
   if (debug) {
     rcvd_cnt += 1;
-    rcvd_cnt = rcvd_cnt;
-    std::cout << "#RCV snd_id=" << std::to_string(packet_info.sender_id)
+    std::cout << "#RCV snd_id=" << std::to_string(packet_info.tx.id)
               << " snd_net=";
-                            for (uint32_t i = 0; i < sizeof(packet_info.sender_bus_id); i++) {
-                              std::cout << std::to_string(packet_info.sender_bus_id[i]);
-                              if (i < sizeof(packet_info.sender_bus_id) - 1)
+                            for (uint32_t i = 0; i < sizeof(packet_info.tx.bus_id); i++) {
+                              std::cout << std::to_string(packet_info.tx.bus_id[i]);
+                              if (i < sizeof(packet_info.tx.bus_id) - 1)
                                 std::cout << ".";
                             }
-    std::cout << " rcv_id=" << std::to_string(packet_info.receiver_id)
+    std::cout << " rcv_id=" << std::to_string(packet_info.rx.id)
               << " rcv_net=";
-                            for (uint32_t i = 0; i < sizeof(packet_info.receiver_bus_id); i++) {
-                              std::cout << std::to_string(packet_info.receiver_bus_id[i]);
-                              if (i < sizeof(packet_info.receiver_bus_id) - 1)
+                            for (uint32_t i = 0; i < sizeof(packet_info.rx.bus_id); i++) {
+                              std::cout << std::to_string(packet_info.rx.bus_id[i]);
+                              if (i < sizeof(packet_info.rx.bus_id) - 1)
                                 std::cout << ".";
                             }
     std::cout << " id=" << std::to_string(packet_info.id)
@@ -94,10 +88,10 @@ static void receiver_function(uint8_t *payload, uint16_t length, const PJON_Pack
               << " data=" << response;
     std::cout << std::endl;
   }
-  message_processing(response, packet_info.sender_id);
+  message_processing(response, packet_info.tx.id);
 };
 
-static void error_handler_function(uint8_t code, uint16_t data, void *custom_pointer) {
+static void error_handler(uint8_t code, uint16_t data, void *custom_pointer) {
   if(code == PJON_CONNECTION_LOST) {
     std::string error_device;
     error_device = std::to_string(bus.packets[data].content[0]);
@@ -128,10 +122,9 @@ void run_server(std::string bind_ip) {
           std::cout << "Received command: " << data << std::endl;
           std::cout << "Attempting to send a packet..." << std::endl;
         }
-        bus.send(node_id, data, strlen(data));
+        bus.send_packet_blocking(node_id, data, strlen(data));
         if (debug)
           std::cout << "Attempting to roll bus..." << std::endl;
-        bus.update();
         uint32_t time_start = micros();
         while(micros() - time_start < 1000000) {
           if (check_messages_array.size() != 0) {
@@ -141,6 +134,12 @@ void run_server(std::string bind_ip) {
                 check_messages_array.erase(check_messages_array.begin()+i);
                 i -= 1;
               } else if (check_messages_array[i][0] == std::to_string(node_id) and response_data == data) {
+                response = check_messages_array[i][1];
+                check_messages_array.erase(check_messages_array.begin()+i);
+                time_start = micros() - 1000000;
+                send_requests = 1;
+                break;
+              } else if (check_messages_array[i][0] == std::to_string(node_id) and response_data == error_name) {
                 response = check_messages_array[i][1];
                 check_messages_array.erase(check_messages_array.begin()+i);
                 time_start = micros() - 1000000;
@@ -218,9 +217,8 @@ void grpc_client(std::string grpc_server_ip) {
 
 void listen_on_bus() {
   while(true) {
-    bus.update();
     bus.receive();
-    delayMicroseconds(500);
+    delayMicroseconds(1);
   }
 }
 
@@ -299,8 +297,8 @@ int main(int argc, char** argv) {
     bus.begin();
     bus.set_receiver(receiver_function);
     if (debug)
-      bus.set_error(error_handler_function);
-    bus.set_synchronous_acknowledge(true);
+      bus.set_error(error_handler);
+    bus.set_acknowledge(true);
     bus.set_crc_32(true);
     bus.set_packet_id(true);
 
