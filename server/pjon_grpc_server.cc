@@ -218,7 +218,7 @@ void grpc_client(std::string grpc_server_ip) {
 void listen_on_bus() {
   while(true) {
     bus.receive();
-    delayMicroseconds(1);
+    delay(1);
   }
 }
 
