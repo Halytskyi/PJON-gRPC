@@ -208,17 +208,17 @@ void grpc_client(std::string grpc_server_ip) {
           std::cout << "gRPC server answer: " << reply << std::endl;
         if (reply == "done")
           receives_queue.pop();
-        delayMicroseconds(100000);
+        delay(100); // 0.1 second
       }
     }
-    delayMicroseconds(100000);
+    delay(100); // 0.1 second
   }
 }
 
 void listen_on_bus() {
   while(true) {
     bus.receive();
-    delay(1);
+    delay(3); // 0.003 second
   }
 }
 
